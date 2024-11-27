@@ -5,11 +5,16 @@ import { v4 as uuidv4 } from "uuid";
 import { DynamoDBService } from "../services/dynamoDBService";
 import { Task } from "../models/Task";
 import { handleError, ValidationError } from "../utils/errorHandling";
+import { authenticate } from "../middleware/auth";
 
 const dynamoDBService = new DynamoDBService(process.env.TASKS_TABLE || "");
 
 export const createTask: APIGatewayProxyHandler = async (event) => {
+  console.log("Received createTask request. Event:", JSON.stringify(event));
   try {
+    await authenticate(event);
+
+    // If authentication passes, proceed with task creation
     if (!event.body) {
       throw new ValidationError("Request body is required");
     }
@@ -40,6 +45,7 @@ export const createTask: APIGatewayProxyHandler = async (event) => {
       body: JSON.stringify({ message: "Task created successfully", taskId }),
     };
   } catch (error) {
+    console.error("Error in createTask:", error);
     return handleError(error);
   }
 };

@@ -1,25 +1,25 @@
 // src/middleware/auth.ts
 
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyEvent } from "aws-lambda";
 import { verifyToken } from "../utils/jwt";
-import { handleError, ValidationError } from "../utils/errorHandling";
+import { ValidationError } from "../utils/errorHandling";
 
-export async function authenticate(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult | null> {
+export async function authenticate(event: APIGatewayProxyEvent): Promise<void> {
   const authHeader = event.headers.Authorization || event.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    console.error("Invalid or missing Authorization header:", authHeader);
     throw new ValidationError("Authorization header is missing or invalid");
   }
 
   const token = authHeader.split(" ")[1];
-  const decoded = verifyToken(token);
 
-  if (!decoded) {
+  const isValid = verifyToken(token);
+
+  if (!isValid) {
+    console.error("Token validation failed");
     throw new ValidationError("Invalid token");
   }
 
-  // Attach user info to event if needed
-  // event.requestContext.authorizer = decoded;
-
-  return null; // Continue processing if authenticated
+  console.log("Authentication successful");
 }

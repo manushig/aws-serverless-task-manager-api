@@ -7,16 +7,13 @@ provider:
   runtime: nodejs20.x
   lambdaHashingVersion: 20201221
   memorySize: 256
-
-  # you can overwrite defaults here
   stage: dev
   region: us-west-2
 
-  # you can define service wide environment variables here
   environment:
     TASKS_TABLE: ${self:service}-${self:provider.stage}-tasks
+    JWT_SECRET: ${self:custom.dotenvVars.JWT_SECRET}
 
-  # you can add statements to the Lambda function's IAM Role here
   iam:
     role:
       statements:
@@ -30,7 +27,9 @@ provider:
           Resource:
             - { "Fn::GetAtt": ["TasksTable", "Arn"] }
 
-# you can add packaging information here
+custom:
+  dotenvVars: ${file(config.js)}
+
 package:
   patterns:
     - config/**
@@ -76,8 +75,11 @@ functions:
       - httpApi:
           path: /tasks/{id}
           method: delete
+
 plugins:
+  - serverless-dotenv-plugin
   - serverless-plugin-typescript
+
 resources:
   Resources:
     TasksTable:

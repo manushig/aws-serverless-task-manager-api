@@ -70,12 +70,21 @@ export class DynamoDBService {
     }
   }
 
-  async getAllTasks(): Promise<Task[]> {
-    const params = { TableName: this.tableName };
+  async getAllTasks(limit: number = 20, nextToken?: string): Promise<{ tasks: Task[]; nextToken?: string }> {
+    let exclusiveStartKey: any = undefined;
+    if (nextToken) {
+      exclusiveStartKey = JSON.parse(Buffer.from(nextToken, "base64").toString());
+    }
+
+    const params = {
+      TableName: this.tableName,
+      Limit: limit,
+      ExclusiveStartKey: exclusiveStartKey,
+    };
 
     try {
       const result = await dynamoDbClient.send(new ScanCommand(params));
-      return result.Items
+      const tasks = result.Items
         ? result.Items.map((item) => ({
             id: item.id.S || "",
             title: item.title.S || "",
@@ -83,6 +92,16 @@ export class DynamoDBService {
             status: item.status.S || "",
           }))
         : [];
+
+      let newNextToken: string | undefined = undefined;
+      if (result.LastEvaluatedKey) {
+        newNextToken = Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString("base64");
+      }
+
+      return {
+        tasks,
+        nextToken: newNextToken,
+      };
     } catch (error) {
       throw new Error("Error fetching tasks from the database");
     }

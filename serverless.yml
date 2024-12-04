@@ -15,6 +15,7 @@ provider:
     JWT_SECRET: ${self:custom.dotenvVars.JWT_SECRET}
     SNS_TOPIC_ARN: !Ref ErroringLambdaAlarmTopic
     CUSTOM_REGION: ${self:provider.region}
+    DEFAULT_PAGINATION_LIMIT: 5
 
   iam:
     role:

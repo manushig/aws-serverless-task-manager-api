@@ -21,6 +21,12 @@ export const createTask: APIGatewayProxyHandler = async (event) => {
 
     const requestBody = JSON.parse(event.body);
 
+    const allowedFields = ["title", "description"];
+    const unexpectedFields = Object.keys(requestBody).filter((key) => !allowedFields.includes(key));
+    if (unexpectedFields.length > 0) {
+      throw new ValidationError(`Unexpected fields: ${unexpectedFields.join(", ")}`);
+    }
+
     if (!requestBody.title || typeof requestBody.title !== "string" || requestBody.title.trim().length === 0) {
       throw new ValidationError("Title is required and must be a non-empty string");
     }
@@ -45,7 +51,9 @@ export const createTask: APIGatewayProxyHandler = async (event) => {
       body: JSON.stringify({ message: "Task created successfully", taskId }),
     };
   } catch (error) {
+    const response = handleError(error);
     console.error("Error in createTask:", error);
-    return handleError(error);
+
+    return response;
   }
 };

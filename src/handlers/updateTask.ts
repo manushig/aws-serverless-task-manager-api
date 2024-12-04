@@ -54,6 +54,9 @@ export const updateTask: APIGatewayProxyHandler = async (event) => {
       body: JSON.stringify({ message: "Task updated successfully" }),
     };
   } catch (error) {
-    return handleError(error);
+    const response = handleError(error);
+    console.error("Error in updateTask:", error);
+
+    return response;
   }
 };

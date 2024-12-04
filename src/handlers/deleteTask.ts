@@ -25,6 +25,8 @@ export const deleteTask: APIGatewayProxyHandler = async (event) => {
       body: JSON.stringify({ message: "Task deleted successfully" }),
     };
   } catch (error) {
-    return handleError(error);
+    const response = handleError(error);
+    console.error("Error in deleteTask:", error);
+    return response;
   }
 };

@@ -19,6 +19,8 @@ export const getTasks: APIGatewayProxyHandler = async (event) => {
       body: JSON.stringify(tasks),
     };
   } catch (error) {
-    return handleError(error);
+    const response = handleError(error);
+    console.error("Error in getTasks:", error);
+    return response;
   }
 };

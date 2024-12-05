@@ -39,6 +39,9 @@ provider:
 
 custom:
   dotenvVars: ${file(config.js)}
+  apiGatewayThrottling:
+    maxRequestsPerSecond: 10
+    maxConcurrentRequests: 5
 
 package:
   patterns:
@@ -47,56 +50,75 @@ package:
 functions:
   createTask:
     handler: src/handlers/createTask.createTask
-    memorySize: 128 #mb
-    timeout: 5 #seconds
+    memorySize: 128
+    timeout: 5
     events:
       - httpApi:
           path: /tasks
           method: post
+          throttling:
+            maxRequestsPerSecond: 5
+            jjj: 2
   getTasks:
     handler: src/handlers/getTasks.getTasks
-    memorySize: 128 #mb
-    timeout: 5 #seconds
+    memorySize: 128
+    timeout: 5
     events:
       - httpApi:
           path: /tasks
           method: get
+          throttling:
+            maxRequestsPerSecond: 5
+            maxConcurrentRequests: 2
   getTask:
     handler: src/handlers/getTask.getTask
-    memorySize: 128 #mb
-    timeout: 5 #seconds
+    memorySize: 128
+    timeout: 5
     events:
       - httpApi:
           path: /tasks/{id}
           method: get
+          throttling:
+            maxRequestsPerSecond: 5
+            maxConcurrentRequests: 2
   updateTask:
     handler: src/handlers/updateTask.updateTask
-    memorySize: 128 #mb
-    timeout: 5 #seconds
+    memorySize: 128
+    timeout: 5
     events:
       - httpApi:
           path: /tasks/{id}
           method: put
+          throttling:
+            maxRequestsPerSecond: 5
+            maxConcurrentRequests: 2
   deleteTask:
     handler: src/handlers/deleteTask.deleteTask
-    memorySize: 128 #mb
-    timeout: 5 #seconds
+    memorySize: 128
+    timeout: 5
     events:
       - httpApi:
           path: /tasks/{id}
           method: delete
+          throttling:
+            maxRequestsPerSecond: 5
+            maxConcurrentRequests: 2
   subscribeToSNS:
     handler: src/handlers/subscribeToSNS.handler
     events:
       - http:
           path: subscribe
           method: post
+          throttling:
+            maxRequestsPerSecond: 5
+            maxConcurrentRequests: 2
     environment:
       SNS_TOPIC_ARN: !Ref ErroringLambdaAlarmTopic
 
 plugins:
   - serverless-dotenv-plugin
   - serverless-plugin-typescript
+  - serverless-api-gateway-throttling
 
 resources:
   Resources:
